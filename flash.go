@@ -96,8 +96,7 @@ func (f Flash) Set(key, value string) {
 
 // Get gets value from flash
 func (f Flash) Get(key string) string {
-	r := url.Values(f).Get(key)
-	return r
+	return url.Values(f).Get(key)
 }
 
 // Add adds value to flash
