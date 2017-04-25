@@ -4,14 +4,46 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"net/http"
 	"net/url"
+
+	"github.com/acoshift/middleware"
+	"github.com/acoshift/session"
 )
 
 // Flash type
 type Flash url.Values
 
 func init() {
-	gob.Register(&Flash{})
+	gob.Register(flashKey)
+}
+
+// Middleware decodes flash data from session and save back
+func Middleware() middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			sess := session.Get(ctx)
+			var f Flash
+			if b, ok := sess.Get(flashKey).([]byte); ok {
+				f, _ = Decode(b)
+			}
+			if f == nil {
+				f = New()
+			}
+
+			defer func() {
+				// save flash back to session
+				b, err := f.Encode()
+				if err == nil {
+					sess.Set(flashKey, b)
+				}
+			}()
+
+			nr := r.WithContext(Set(ctx, f))
+			h.ServeHTTP(w, nr)
+		})
+	}
 }
 
 // New creates new flash
@@ -62,9 +94,11 @@ func (f Flash) Set(key, value string) {
 	url.Values(f).Set(key, value)
 }
 
-// Get gets value from flash
+// Get gets value from flash and delete
 func (f Flash) Get(key string) string {
-	return url.Values(f).Get(key)
+	r := url.Values(f).Get(key)
+	f.Del(key)
+	return r
 }
 
 // Add adds value to flash
@@ -77,9 +111,15 @@ func (f Flash) Del(key string) {
 	url.Values(f).Del(key)
 }
 
+// Has checks is flash has a given key
+func (f Flash) Has(key string) bool {
+	return len(url.Values(f)[key]) > 0
+}
+
 // Clear deletes all data
 func (f Flash) Clear() {
+	v := url.Values(f)
 	for k := range f {
-		url.Values(f).Del(k)
+		v.Del(k)
 	}
 }
