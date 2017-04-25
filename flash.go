@@ -94,10 +94,9 @@ func (f Flash) Set(key, value string) {
 	url.Values(f).Set(key, value)
 }
 
-// Get gets value from flash and delete
+// Get gets value from flash
 func (f Flash) Get(key string) string {
 	r := url.Values(f).Get(key)
-	f.Del(key)
 	return r
 }
 
