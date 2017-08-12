@@ -1,16 +1,7 @@
 package flash_test
 
 import (
-	"bytes"
-	"context"
-	"net/http"
-	"net/http/httptest"
 	"testing"
-	"time"
-
-	"github.com/acoshift/middleware"
-	"github.com/acoshift/session"
-	"github.com/acoshift/session/store/memory"
 
 	. "github.com/acoshift/flash"
 )
@@ -103,55 +94,5 @@ func TestOperators(t *testing.T) {
 	f.Clear()
 	if len(f) > 0 {
 		t.Errorf("expected f empty after clear")
-	}
-}
-
-func TestContext(t *testing.T) {
-	ctx := context.Background()
-	f := Get(ctx)
-	if f == nil {
-		t.Errorf("expected Get from empty context returns non-nil flash; got nil")
-	}
-	f.Set("a", "1")
-	ctx = Set(ctx, f)
-	p := Get(ctx)
-
-	bf, _ := f.Encode()
-	bp, _ := p.Encode()
-	if bytes.Compare(bf, bp) != 0 {
-		t.Errorf("expected Get returns same flash as Set")
-	}
-}
-
-func TestMiddleware(t *testing.T) {
-	i := 0
-	h := middleware.Chain(
-		session.Middleware(session.Config{Store: memory.New(memory.Config{}), MaxAge: time.Minute}),
-		Middleware(),
-	)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		f := Get(ctx)
-		if i == 0 {
-			f.Set("a", "1")
-			i = 1
-			w.Write(nil)
-			return
-		}
-		if f.Get("a") != "1" {
-			t.Fatalf("expected flash save in session")
-		}
-		w.Write(nil)
-	}))
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	resp := httptest.NewRecorder()
-	h.ServeHTTP(resp, req)
-	req = httptest.NewRequest(http.MethodGet, "/", nil)
-	for _, c := range resp.Result().Cookies() {
-		req.AddCookie(c)
-	}
-	resp = httptest.NewRecorder()
-	h.ServeHTTP(resp, req)
-	if i != 1 {
-		t.Fatalf("expected handler called 2 times")
 	}
 }
