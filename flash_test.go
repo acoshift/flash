@@ -1,7 +1,7 @@
 package flash_test
 
 import (
-	"bytes"
+	"net/url"
 	"testing"
 
 	. "github.com/acoshift/flash"
@@ -106,16 +106,16 @@ func TestClone(t *testing.T) {
 
 	p := f.Clone()
 
-	fb, _ := f.Encode()
-	pb, _ := p.Encode()
-	if !bytes.Equal(fb, pb) {
+	fb := url.Values(f).Encode()
+	pb := url.Values(p).Encode()
+	if fb != pb {
 		t.Fatalf("expected cloned encode to be same value")
 	}
 
 	f.Clear()
-	fb, _ = f.Encode()
-	pb, _ = p.Encode()
-	if bytes.Equal(fb, pb) {
+	fb = url.Values(f).Encode()
+	pb = url.Values(p).Encode()
+	if fb == pb {
 		t.Fatalf("expected cloned encode and cleard original not same value")
 	}
 }
