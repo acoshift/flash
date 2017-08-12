@@ -75,3 +75,16 @@ func (f Flash) Clear() {
 		v.Del(k)
 	}
 }
+
+// Clone clones flash
+func (f Flash) Clone() Flash {
+	v := url.Values(f)
+	n := make(url.Values, len(v))
+	for k, vv := range v {
+		n[k] = make([]string, len(vv))
+		for kk, vvv := range vv {
+			n[k][kk] = vvv
+		}
+	}
+	return Flash(n)
+}

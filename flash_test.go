@@ -1,6 +1,7 @@
 package flash_test
 
 import (
+	"bytes"
 	"testing"
 
 	. "github.com/acoshift/flash"
@@ -94,5 +95,27 @@ func TestOperators(t *testing.T) {
 	f.Clear()
 	if len(f) > 0 {
 		t.Errorf("expected f empty after clear")
+	}
+}
+
+func TestClone(t *testing.T) {
+	f := New()
+	f.Add("a", "1")
+	f.Add("a", "2")
+	f.Add("b", "3")
+
+	p := f.Clone()
+
+	fb, _ := f.Encode()
+	pb, _ := p.Encode()
+	if !bytes.Equal(fb, pb) {
+		t.Fatalf("expected cloned encode to be same value")
+	}
+
+	f.Clear()
+	fb, _ = f.Encode()
+	pb, _ = p.Encode()
+	if bytes.Equal(fb, pb) {
+		t.Fatalf("expected cloned encode and cleard original not same value")
 	}
 }
