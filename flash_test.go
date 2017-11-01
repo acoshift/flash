@@ -79,6 +79,16 @@ func TestEncodeDecode(t *testing.T) {
 	if p.Changed() {
 		t.Errorf("expected Decode not empty flash must unchange; got changed")
 	}
+	p.Clear()
+	if !p.Changed() {
+		t.Errorf("expected clear not empty unchanged flash must changed; got unchange")
+	}
+
+	p, _ = Decode(b)
+	p.Del("a")
+	if !p.Changed() {
+		t.Errorf("expected Del from not empty unchanged flash must change; got unchanged")
+	}
 }
 
 func TestOperators(t *testing.T) {
@@ -107,6 +117,11 @@ func TestOperators(t *testing.T) {
 	f.Del("b")
 	if f.Has("b") {
 		t.Errorf("expected f don't have b")
+	}
+
+	f.Del("empty")
+	if f.Has("empty") {
+		t.Errorf("expected f don't have empty")
 	}
 
 	f.Clear()
