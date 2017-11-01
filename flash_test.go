@@ -113,6 +113,9 @@ func TestOperators(t *testing.T) {
 	if p := len(f.Values()["c"]); p != 2 {
 		t.Errorf("expected f.c has 2 values; got %d value(s)", p)
 	}
+	if p := len(f.GetAll("c")); p != 2 {
+		t.Errorf("expected f.c has 2 values; got %d value(s)", p)
+	}
 
 	f.Del("b")
 	if f.Has("b") {

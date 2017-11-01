@@ -59,6 +59,11 @@ func (f *Flash) Get(key string) string {
 	return f.v.Get(key)
 }
 
+// GetAll gets []string from values
+func (f *Flash) GetAll(key string) []string {
+	return f.v[key]
+}
+
 // Values returns clone of flash's values
 func (f *Flash) Values() url.Values {
 	return cloneValues(f.v)
