@@ -32,7 +32,7 @@ func Decode(b []byte) (*Flash, error) {
 }
 
 // Encode encodes flash
-func (f Flash) Encode() ([]byte, error) {
+func (f *Flash) Encode() ([]byte, error) {
 	// empty flash encode to empty bytes
 	if len(f.v) == 0 {
 		return []byte{}, nil

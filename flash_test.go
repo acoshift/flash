@@ -136,3 +136,13 @@ func TestClone(t *testing.T) {
 		t.Fatalf("expected cloned encode and cleard original not same value")
 	}
 }
+
+func TestDecodeError(t *testing.T) {
+	f, err := Decode([]byte("invalid data"))
+	if err == nil {
+		t.Fatalf("expected decode invalid data returns error; got nil")
+	}
+	if f != nil {
+		t.Fatalf("expected decode invalid data returns nil flash; got %v", f)
+	}
+}
