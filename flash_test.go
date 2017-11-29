@@ -161,3 +161,11 @@ func TestDecodeError(t *testing.T) {
 		t.Fatalf("expected decode invalid data returns nil flash; got %v", f)
 	}
 }
+
+func TestClearEmpty(t *testing.T) {
+	f := New()
+	f.Clear()
+	if f.Changed() {
+		t.Fatalf("expected clear empty flash must not changed")
+	}
+}
