@@ -90,10 +90,10 @@ func (f *Flash) Has(key string) bool {
 
 // Clear deletes all data
 func (f *Flash) Clear() {
-	if !f.changed {
-		f.changed = true
-	}
 	for k := range f.v {
+		if !f.changed {
+			f.changed = true
+		}
 		f.v.Del(k)
 	}
 }
