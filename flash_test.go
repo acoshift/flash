@@ -1,9 +1,7 @@
-package flash_test
+package flash
 
 import (
 	"testing"
-
-	. "github.com/acoshift/flash"
 )
 
 func TestNew(t *testing.T) {
@@ -73,9 +71,6 @@ func TestEncodeDecode(t *testing.T) {
 	if n := f.Count(); n != 1 {
 		t.Errorf("expected Decode returns 1 key flash; got %d", n)
 	}
-	if f.Values()["a"][0] != "1" {
-		t.Errorf("expected Decode returns same value; got %v", f.Values()["a"][0])
-	}
 	if p.Changed() {
 		t.Errorf("expected Decode not empty flash must unchange; got changed")
 	}
@@ -110,9 +105,6 @@ func TestOperators(t *testing.T) {
 	if p := f.Get("c"); p != "3" {
 		t.Errorf("expected Get 'c' from f is 3; got %s", p)
 	}
-	if p := len(f.Values()["c"]); p != 2 {
-		t.Errorf("expected f.c has 2 values; got %d value(s)", p)
-	}
 
 	f.Del("b")
 	if f.Has("b") {
@@ -130,6 +122,23 @@ func TestOperators(t *testing.T) {
 	}
 }
 
+func equals(f *Flash, p *Flash) bool {
+	if f.Count() != p.Count() {
+		return false
+	}
+	for k := range f.v {
+		if len(f.v[k]) != len(p.v[k]) {
+			return false
+		}
+		for kk := range f.v[k] {
+			if f.v[k][kk] != p.v[k][kk] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func TestClone(t *testing.T) {
 	f := New()
 	f.Add("a", "1")
@@ -138,16 +147,16 @@ func TestClone(t *testing.T) {
 
 	p := f.Clone()
 
-	fb := f.Values().Encode()
-	pb := p.Values().Encode()
-	if fb != pb {
+	if f == p {
+		t.Fatalf("expected cloned flash don't have same pointer")
+	}
+
+	if !equals(f, p) {
 		t.Fatalf("expected cloned encode to be same value")
 	}
 
 	f.Clear()
-	fb = f.Values().Encode()
-	pb = p.Values().Encode()
-	if fb == pb {
+	if equals(f, p) {
 		t.Fatalf("expected cloned encode and cleard original not same value")
 	}
 }

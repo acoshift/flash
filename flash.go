@@ -3,18 +3,19 @@ package flash
 import (
 	"bytes"
 	"encoding/gob"
-	"net/url"
 )
 
 // Flash type
 type Flash struct {
-	v       url.Values
+	v       data
 	changed bool
 }
 
+type data map[string][]interface{}
+
 // New creates new flash
 func New() *Flash {
-	return &Flash{v: make(url.Values)}
+	return &Flash{}
 }
 
 // Decode decodes flash data
@@ -47,29 +48,36 @@ func (f *Flash) Encode() ([]byte, error) {
 }
 
 // Set sets value to flash
-func (f *Flash) Set(key, value string) {
+func (f *Flash) Set(key string, value interface{}) {
 	if !f.changed {
 		f.changed = true
 	}
-	f.v.Set(key, value)
+	if f.v == nil {
+		f.v = make(data)
+	}
+	f.v[key] = []interface{}{value}
 }
 
 // Get gets value from flash
-func (f *Flash) Get(key string) string {
-	return f.v.Get(key)
-}
-
-// Values returns clone of flash's values
-func (f *Flash) Values() url.Values {
-	return cloneValues(f.v)
+func (f *Flash) Get(key string) interface{} {
+	if f.v == nil {
+		return nil
+	}
+	if len(f.v[key]) == 0 {
+		return nil
+	}
+	return f.v[key][0]
 }
 
 // Add adds value to flash
-func (f *Flash) Add(key, value string) {
+func (f *Flash) Add(key string, value interface{}) {
 	if !f.changed {
 		f.changed = true
 	}
-	f.v.Add(key, value)
+	if f.v == nil {
+		f.v = make(data)
+	}
+	f.v[key] = append(f.v[key], value)
 }
 
 // Del deletes key from flash
@@ -80,22 +88,23 @@ func (f *Flash) Del(key string) {
 	if !f.changed {
 		f.changed = true
 	}
-	f.v.Del(key)
+	f.v[key] = nil
 }
 
 // Has checks is flash has a given key
 func (f *Flash) Has(key string) bool {
+	if f.v == nil {
+		return false
+	}
 	return len(f.v[key]) > 0
 }
 
 // Clear deletes all data
 func (f *Flash) Clear() {
-	for k := range f.v {
-		if !f.changed {
-			f.changed = true
-		}
-		f.v.Del(k)
+	if f.Count() > 0 {
+		f.changed = true
 	}
+	f.v = nil
 }
 
 // Count returns count of flash's keys
@@ -113,10 +122,10 @@ func (f *Flash) Changed() bool {
 	return f.changed
 }
 
-func cloneValues(src url.Values) url.Values {
-	n := make(url.Values, len(src))
+func cloneValues(src data) data {
+	n := make(data, len(src))
 	for k, vv := range src {
-		n[k] = make([]string, len(vv))
+		n[k] = make([]interface{}, len(vv))
 		for kk, vvv := range vv {
 			n[k][kk] = vvv
 		}
