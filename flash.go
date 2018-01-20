@@ -11,9 +11,6 @@ type Flash struct {
 	changed bool
 }
 
-// Data is the flash data
-type Data map[string][]interface{}
-
 // New creates new flash
 func New() *Flash {
 	return &Flash{}
@@ -53,39 +50,7 @@ func (f *Flash) Values() Data {
 	return f.v
 }
 
-// Set sets value to flash
-func (f *Flash) Set(key string, value interface{}) {
-	if !f.changed {
-		f.changed = true
-	}
-	if f.v == nil {
-		f.v = make(Data)
-	}
-	f.v[key] = []interface{}{value}
-}
-
-// Add adds value to flash
-func (f *Flash) Add(key string, value interface{}) {
-	if !f.changed {
-		f.changed = true
-	}
-	if f.v == nil {
-		f.v = make(Data)
-	}
-	f.v[key] = append(f.v[key], value)
-}
-
-// Get gets value from flash
-func (f *Flash) Get(key string) interface{} {
-	if f.v == nil {
-		return nil
-	}
-	if len(f.v[key]) == 0 {
-		return nil
-	}
-	return f.v[key][0]
-}
-
+// Value returns slice of given key
 func (f *Flash) Value(key string) []interface{} {
 	if f.v == nil {
 		return []interface{}{}
@@ -96,53 +61,69 @@ func (f *Flash) Value(key string) []interface{} {
 	return f.v[key]
 }
 
+// Set sets value to flash
+func (f *Flash) Set(key string, value interface{}) {
+	if !f.changed {
+		f.changed = true
+	}
+	if f.v == nil {
+		f.v = make(Data)
+	}
+	f.v.Set(key, value)
+}
+
+// Add adds value to flash
+func (f *Flash) Add(key string, value interface{}) {
+	if !f.changed {
+		f.changed = true
+	}
+	if f.v == nil {
+		f.v = make(Data)
+	}
+	f.v.Add(key, value)
+}
+
+// Get gets value from flash
+func (f *Flash) Get(key string) interface{} {
+	return f.v.Get(key)
+}
+
 // GetString gets string from flash
 func (f *Flash) GetString(key string) string {
-	r, _ := f.Get(key).(string)
-	return r
+	return f.v.GetString(key)
 }
 
 // GetInt gets int from flash
 func (f *Flash) GetInt(key string) int {
-	r, _ := f.Get(key).(int)
-	return r
+	return f.v.GetInt(key)
 }
 
 // GetInt64 gets int64 from flash
 func (f *Flash) GetInt64(key string) int64 {
-	r, _ := f.Get(key).(int64)
-	return r
+	return f.v.GetInt64(key)
 }
 
 // GetFloat32 gets float32 from flash
 func (f *Flash) GetFloat32(key string) float32 {
-	r, _ := f.Get(key).(float32)
-	return r
+	return f.v.GetFloat32(key)
 }
 
-// GetFloat64 gets float64 ffrom flash
+// GetFloat64 gets float64 from flash
 func (f *Flash) GetFloat64(key string) float64 {
-	r, _ := f.Get(key).(float64)
-	return r
+	return f.v.GetFloat64(key)
 }
 
 // Del deletes key from flash
 func (f *Flash) Del(key string) {
-	if !f.Has(key) {
-		return
-	}
-	if !f.changed {
+	if f.Has(key) {
 		f.changed = true
 	}
-	f.v[key] = nil
+	f.v.Del(key)
 }
 
 // Has checks is flash has a given key
 func (f *Flash) Has(key string) bool {
-	if f.v == nil {
-		return false
-	}
-	return len(f.v[key]) > 0
+	return f.v.Has(key)
 }
 
 // Clear deletes all data
