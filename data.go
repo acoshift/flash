@@ -54,6 +54,12 @@ func (d Data) GetFloat64(key string) float64 {
 	return r
 }
 
+// GetBool gets bool from data
+func (d Data) GetBool(key string) bool {
+	r, _ := d.Get(key).(bool)
+	return r
+}
+
 // Del deletes key from data
 func (d Data) Del(key string) {
 	d[key] = nil

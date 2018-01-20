@@ -164,6 +164,10 @@ func TestOperators(t *testing.T) {
 	if f.GetFloat64("float64") != float64(1.5) {
 		t.Errorf("expected get float64 return valid value")
 	}
+	f.Set("bool", true)
+	if f.GetBool("bool") != true {
+		t.Errorf("expected get bool return valid value")
+	}
 
 	if len(f.Value("empty")) != 0 {
 		t.Errorf("expected value from empty key return zero-length slice")

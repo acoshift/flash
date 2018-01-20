@@ -113,6 +113,11 @@ func (f *Flash) GetFloat64(key string) float64 {
 	return f.v.GetFloat64(key)
 }
 
+// GetBool gets bool from flash
+func (f *Flash) GetBool(key string) bool {
+	return f.v.GetBool(key)
+}
+
 // Del deletes key from flash
 func (f *Flash) Del(key string) {
 	if f.Has(key) {
