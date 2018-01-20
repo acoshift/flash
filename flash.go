@@ -7,11 +7,12 @@ import (
 
 // Flash type
 type Flash struct {
-	v       data
+	v       Data
 	changed bool
 }
 
-type data map[string][]interface{}
+// Data is the flash data
+type Data map[string][]interface{}
 
 // New creates new flash
 func New() *Flash {
@@ -42,9 +43,14 @@ func (f *Flash) Encode() ([]byte, error) {
 	buf := &bytes.Buffer{}
 	err := gob.NewEncoder(buf).Encode(f.v)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	return buf.Bytes(), nil
+}
+
+// Values returns flash's data
+func (f *Flash) Values() Data {
+	return f.v
 }
 
 // Set sets value to flash
@@ -53,9 +59,20 @@ func (f *Flash) Set(key string, value interface{}) {
 		f.changed = true
 	}
 	if f.v == nil {
-		f.v = make(data)
+		f.v = make(Data)
 	}
 	f.v[key] = []interface{}{value}
+}
+
+// Add adds value to flash
+func (f *Flash) Add(key string, value interface{}) {
+	if !f.changed {
+		f.changed = true
+	}
+	if f.v == nil {
+		f.v = make(Data)
+	}
+	f.v[key] = append(f.v[key], value)
 }
 
 // Get gets value from flash
@@ -69,15 +86,34 @@ func (f *Flash) Get(key string) interface{} {
 	return f.v[key][0]
 }
 
-// Add adds value to flash
-func (f *Flash) Add(key string, value interface{}) {
-	if !f.changed {
-		f.changed = true
-	}
-	if f.v == nil {
-		f.v = make(data)
-	}
-	f.v[key] = append(f.v[key], value)
+// GetString gets string from flash
+func (f *Flash) GetString(key string) string {
+	r, _ := f.Get(key).(string)
+	return r
+}
+
+// GetInt gets int from flash
+func (f *Flash) GetInt(key string) int {
+	r, _ := f.Get(key).(int)
+	return r
+}
+
+// GetInt64 gets int64 from flash
+func (f *Flash) GetInt64(key string) int64 {
+	r, _ := f.Get(key).(int64)
+	return r
+}
+
+// GetFloat32 gets float32 from flash
+func (f *Flash) GetFloat32(key string) float32 {
+	r, _ := f.Get(key).(float32)
+	return r
+}
+
+// GetFloat64 gets float64 ffrom flash
+func (f *Flash) GetFloat64(key string) float64 {
+	r, _ := f.Get(key).(float64)
+	return r
 }
 
 // Del deletes key from flash
@@ -122,8 +158,8 @@ func (f *Flash) Changed() bool {
 	return f.changed
 }
 
-func cloneValues(src data) data {
-	n := make(data, len(src))
+func cloneValues(src Data) Data {
+	n := make(Data, len(src))
 	for k, vv := range src {
 		n[k] = make([]interface{}, len(vv))
 		for kk, vvv := range vv {

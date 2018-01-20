@@ -88,6 +88,14 @@ func TestEncodeDecode(t *testing.T) {
 
 func TestOperators(t *testing.T) {
 	f := New()
+
+	if f.Has("a") {
+		t.Errorf("expected has empty flash return false; got true")
+	}
+	if f.Get("a") != nil {
+		t.Errorf("expected get from empty flash return nil")
+	}
+
 	f.Set("a", "1")
 	f.Set("b", "2")
 	f.Add("c", "3")
@@ -120,6 +128,37 @@ func TestOperators(t *testing.T) {
 	if f.Count() > 0 {
 		t.Errorf("expected f empty after clear")
 	}
+
+	f.Set("string", "string value")
+	if f.GetString("string") != "string value" {
+		t.Errorf("expected get string return valid value")
+	}
+	f.Set("int", 1)
+	if f.GetInt("int") != 1 {
+		t.Errorf("expected get int return valid value")
+	}
+	f.Set("int64", int64(1))
+	if f.GetInt64("int64") != int64(1) {
+		t.Errorf("expected get int64 return valid value")
+	}
+	f.Set("float32", float32(1.2))
+	if f.GetFloat32("float32") != float32(1.2) {
+		t.Errorf("expected get float32 return valid value")
+	}
+	f.Set("float64", float64(1.5))
+	if f.GetFloat64("float64") != float64(1.5) {
+		t.Errorf("expected get float64 return valid value")
+	}
+
+	v := f.Values()
+	if len(v) != f.Count() {
+		t.Errorf("expected Values()'s length equals to Count()")
+	}
+
+	f.v["a"] = []interface{}{}
+	if f.Get("a") != nil {
+		t.Errorf("expected get from non-nil, zero-length key return nil")
+	}
 }
 
 func equals(f *Flash, p *Flash) bool {
@@ -148,26 +187,42 @@ func TestClone(t *testing.T) {
 	p := f.Clone()
 
 	if f == p {
-		t.Fatalf("expected cloned flash don't have same pointer")
+		t.Errorf("expected cloned flash don't have same pointer")
 	}
 
 	if !equals(f, p) {
-		t.Fatalf("expected cloned encode to be same value")
+		t.Errorf("expected cloned encode to be same value")
 	}
 
 	f.Clear()
 	if equals(f, p) {
-		t.Fatalf("expected cloned encode and cleard original not same value")
+		t.Errorf("expected cloned encode and cleard original not same value")
+	}
+}
+
+func TestEncodeError(t *testing.T) {
+	v := struct{}{}
+	f := New()
+	f.Set("key", &v)
+	b, err := f.Encode()
+	if err == nil {
+		t.Errorf("expected encode unregistered gob struct error; got nil")
+	}
+	if b == nil {
+		t.Errorf("expected result of encode error not nil")
+	}
+	if len(b) > 0 {
+		t.Errorf("expected length of encode error to be 0; got nil")
 	}
 }
 
 func TestDecodeError(t *testing.T) {
 	f, err := Decode([]byte("invalid data"))
 	if err == nil {
-		t.Fatalf("expected decode invalid data returns error; got nil")
+		t.Errorf("expected decode invalid data returns error; got nil")
 	}
 	if f != nil {
-		t.Fatalf("expected decode invalid data returns nil flash; got %v", f)
+		t.Errorf("expected decode invalid data returns nil flash; got %v", f)
 	}
 }
 
@@ -175,6 +230,6 @@ func TestClearEmpty(t *testing.T) {
 	f := New()
 	f.Clear()
 	if f.Changed() {
-		t.Fatalf("expected clear empty flash must not changed")
+		t.Errorf("expected clear empty flash must not changed")
 	}
 }
