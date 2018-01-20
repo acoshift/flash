@@ -95,6 +95,13 @@ func TestOperators(t *testing.T) {
 	if f.Get("a") != nil {
 		t.Errorf("expected get from empty flash return nil")
 	}
+	l := f.Value("a")
+	if l == nil {
+		t.Errorf("expected value always return non-nil slice")
+	}
+	if len(l) > 0 {
+		t.Errorf("expected value from empty flash return zero-length slice")
+	}
 
 	f.Set("a", "1")
 	f.Set("b", "2")
@@ -124,6 +131,14 @@ func TestOperators(t *testing.T) {
 		t.Errorf("expected f don't have empty")
 	}
 
+	l = f.Value("c")
+	if len(l) != 2 {
+		t.Errorf("expected value from 'c' return 2 length slice; got %d", len(l))
+	}
+	if l[0].(string) != "3" && l[1].(string) != "4" {
+		t.Errorf("expected value return values from added")
+	}
+
 	f.Clear()
 	if f.Count() > 0 {
 		t.Errorf("expected f empty after clear")
@@ -148,6 +163,10 @@ func TestOperators(t *testing.T) {
 	f.Set("float64", float64(1.5))
 	if f.GetFloat64("float64") != float64(1.5) {
 		t.Errorf("expected get float64 return valid value")
+	}
+
+	if len(f.Value("empty")) != 0 {
+		t.Errorf("expected value from empty key return zero-length slice")
 	}
 
 	v := f.Values()

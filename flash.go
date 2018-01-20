@@ -86,6 +86,16 @@ func (f *Flash) Get(key string) interface{} {
 	return f.v[key][0]
 }
 
+func (f *Flash) Value(key string) []interface{} {
+	if f.v == nil {
+		return []interface{}{}
+	}
+	if f.v[key] == nil {
+		return []interface{}{}
+	}
+	return f.v[key]
+}
+
 // GetString gets string from flash
 func (f *Flash) GetString(key string) string {
 	r, _ := f.Get(key).(string)
