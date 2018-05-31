@@ -256,3 +256,12 @@ func TestClearEmpty(t *testing.T) {
 		t.Errorf("expected clear empty flash must not changed")
 	}
 }
+
+func TestDataAfterValues(t *testing.T) {
+	f := New()
+	d := f.Values()
+	f.Set("key", 1)
+	if d.GetInt("key") != 1 {
+		t.Errorf("expected values data mutated after add new value")
+	}
+}
