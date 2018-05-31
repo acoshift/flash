@@ -47,6 +47,9 @@ func (f *Flash) Encode() ([]byte, error) {
 
 // Values returns flash's data
 func (f *Flash) Values() Data {
+	if f.v == nil {
+		f.v = make(Data)
+	}
 	return f.v
 }
 
