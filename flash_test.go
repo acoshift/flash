@@ -95,7 +95,7 @@ func TestOperators(t *testing.T) {
 	if f.Get("a") != nil {
 		t.Errorf("expected get from empty flash return nil")
 	}
-	l := f.Value("a")
+	l := f.Values("a")
 	if l == nil {
 		t.Errorf("expected value always return non-nil slice")
 	}
@@ -120,6 +120,9 @@ func TestOperators(t *testing.T) {
 	if p := f.Get("c"); p != "3" {
 		t.Errorf("expected Get 'c' from f is 3; got %s", p)
 	}
+	if f.Has("c") {
+		t.Errorf("expected 'c' remove from f after get")
+	}
 
 	f.Del("b")
 	if f.Has("b") {
@@ -131,7 +134,10 @@ func TestOperators(t *testing.T) {
 		t.Errorf("expected f don't have empty")
 	}
 
-	l = f.Value("c")
+	f.Add("c", "3")
+	f.Add("c", "4")
+
+	l = f.Values("c")
 	if len(l) != 2 {
 		t.Errorf("expected value from 'c' return 2 length slice; got %d", len(l))
 	}
@@ -169,13 +175,8 @@ func TestOperators(t *testing.T) {
 		t.Errorf("expected get bool return valid value")
 	}
 
-	if len(f.Value("empty")) != 0 {
+	if len(f.Values("empty")) != 0 {
 		t.Errorf("expected value from empty key return zero-length slice")
-	}
-
-	v := f.Values()
-	if len(v) != f.Count() {
-		t.Errorf("expected Values()'s length equals to Count()")
 	}
 
 	f.v["a"] = []interface{}{}
@@ -254,14 +255,5 @@ func TestClearEmpty(t *testing.T) {
 	f.Clear()
 	if f.Changed() {
 		t.Errorf("expected clear empty flash must not changed")
-	}
-}
-
-func TestDataAfterValues(t *testing.T) {
-	f := New()
-	d := f.Values()
-	f.Set("key", 1)
-	if d.GetInt("key") != 1 {
-		t.Errorf("expected values data mutated after add new value")
 	}
 }
