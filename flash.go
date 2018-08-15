@@ -55,7 +55,7 @@ func (f *Flash) Values(key string) []interface{} {
 
 	f.changed = true
 	r := f.v[key]
-	f.v[key] = nil
+	delete(f.v, key)
 	return r
 }
 
@@ -89,7 +89,7 @@ func (f *Flash) Get(key string) interface{} {
 
 	f.changed = true
 	r := f.v[key][0]
-	f.v[key] = nil
+	delete(f.v, key)
 	return r
 }
 
@@ -134,7 +134,7 @@ func (f *Flash) Del(key string) {
 	if f.Has(key) {
 		f.changed = true
 	}
-	f.v[key] = nil
+	delete(f.v, key)
 }
 
 // Has checks is flash has a given key
