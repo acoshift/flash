@@ -257,3 +257,13 @@ func TestClearEmpty(t *testing.T) {
 		t.Errorf("expected clear empty flash must not changed")
 	}
 }
+
+func TestCount(t *testing.T) {
+	f := New()
+	f.Set("a", true)
+	f.Get("a")
+
+	if f.Count() != 0 {
+		t.Errorf("expected count return 0 when already got value")
+	}
+}
